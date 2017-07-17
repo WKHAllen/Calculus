@@ -4,7 +4,7 @@ import threading
 import win32clipboard
 from Tkinter import *
 from ttk import *
-from sympy import *
+from sympy import diff, integrate, symbols
 
 letters = [chr(i) for i in range(ord("a"), ord("z") + 1)]
 
