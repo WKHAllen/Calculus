@@ -1,3 +1,4 @@
+import os
 import sys
 import threading
 import win32clipboard
@@ -7,6 +8,11 @@ from sympy import *
 
 letters = [chr(i) for i in range(ord("a"), ord("z") + 1)]
 
+def resource_path(relative):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative)
+    return os.path.join(relative)
+
 class App:
     def __init__(self):
         self.running = False
@@ -15,7 +21,7 @@ class App:
         self.padding = 25
         self.root = Tk()
         self.root.title("Calculus")
-        self.root.iconbitmap("icon.ico")
+        self.root.iconbitmap(resource_path(os.path.join("data", "icon.ico")))
         self.root.protocol("WM_DELETE_WINDOW", self.close)
 
         self.mainFrame = Frame(self.root)
