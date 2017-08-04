@@ -15,7 +15,7 @@ def resource_path(relative):
 
 class App:
     def __init__(self):
-        self.running = False
+        self.running = True
         self.symbols = symbols(" ".join(letters))
         self.fontSize = 9
         self.padding = 25
@@ -95,92 +95,54 @@ class App:
         self.mainthread = threading.Thread(target = self.main)
         self.mainthread.daemon = True
         self.mainthread.start()
+        self.root.after(100, self.main)
         self.root.mainloop()
 
     def main(self):
-        self.running = True
         derivExp = ""
         integExp = ""
         bounds = ["", ""]
-        while self.running:
+        derivExp = self.derivInput.get()
+        if derivExp == "":
+            self.derivative.configure(text = "")
+        else:
             try:
-                derivExp = self.derivInput.get()
+                ans = diff(derivExp, self.derivVar.get(), self.derivTimes.get())
             except:
-                pass
-            if derivExp == "":
-                try:
-                    self.derivative.configure(text = "")
-                except:
-                    pass
+                self.derivative.configure(text = "Error")
             else:
-                try:
-                    ans = diff(derivExp, self.derivVar.get(), self.derivTimes.get())
-                except:
-                    try:
-                        self.derivative.configure(text = "Error")
-                    except:
-                        pass
-                else:
-                    try:
-                        self.derivative.configure(text = ans.__str__())
-                    except:
-                        pass
+                self.derivative.configure(text = ans.__str__())
+        integExp = self.integInput.get()
+        bounds = [self.integLower.get(), self.integUpper.get()]
+        if not bounds[0]:
+            bounds[0] = None
+        elif bounds[0] == u"-\u221E":
+            bounds[0] = "-oo"
+        if not bounds[1]:
+            bounds[1] = None
+        elif bounds[1] == u"\u221E":
+            bounds[1] = "oo"
+        if integExp == "":
+            self.integral.configure(text = "")
+        else:
             try:
-                integExp = self.integInput.get()
+                ans = integrate(integExp, (self.integVar.get(), bounds[0], bounds[1]))
             except:
-                pass
-            try:
-                bounds = [self.integLower.get(), self.integUpper.get()]
-            except:
-                pass
-            if not bounds[0]:
-                bounds[0] = None
-            elif bounds[0] == u"-\u221E":
-                bounds[0] = "-oo"
-            if not bounds[1]:
-                bounds[1] = None
-            elif bounds[1] == u"\u221E":
-                bounds[1] = "oo"
-            if integExp == "":
-                try:
-                    self.integral.configure(text = "")
-                except:
-                    pass
+                self.integral.configure(text = "Error")
             else:
-                try:
-                    ans = integrate(integExp, (self.integVar.get(), bounds[0], bounds[1]))
-                except:
-                    try:
-                        self.integral.configure(text = "Error")
-                    except:
-                        pass
-                else:
-                    if ans.__str__().startswith("Integral"):
-                        try:
-                            self.integral.configure(text = "Impossible")
-                        except:
-                            pass
-                    elif ans.__str__().startswith("Piecewise"):
-                        try:
-                            self.integral.configure(text = ans.args[1][0].__str__())
-                        except:
-                            pass
-                    elif ans.is_infinite:
-                        if not ans.is_nonnegative:
-                            try:
-                                self.integral.configure(text = u"-\u221E")
-                            except:
-                                pass
-                        else:
-                            try:
-                                self.integral.configure(text = u"\u221E")
-                            except:
-                                pass
+                if ans.__str__().startswith("Integral"):
+                    self.integral.configure(text = "Impossible")
+                elif ans.__str__().startswith("Piecewise"):
+                    self.integral.configure(text = ans.args[1][0].__str__())
+                elif ans.is_infinite:
+                    if not ans.is_nonnegative:
+                        self.integral.configure(text = u"-\u221E")
                     else:
-                        try:
-                            self.integral.configure(text = ans.__str__())
-                        except:
-                            pass
+                        self.integral.configure(text = u"\u221E")
+                else:
+                    self.integral.configure(text = ans.__str__())
+        if self.running:
+            self.root.after(100, self.main)
 
     def close(self):
         self.running = False
